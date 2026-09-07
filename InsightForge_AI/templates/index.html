@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>InsightForge AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================================================= -->
+    <!-- SIDEBAR -->
+    <!-- ================================================= -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                IF
+            </div>
+
+            <div>
+                <h1>InsightForge</h1>
+                <span>AI Analytics Assistant</span>
+            </div>
+
+        </div>
+
+
+        <nav class="navigation">
+
+            <button class="nav-item active"
+                    data-page="dashboard">
+
+                <span>⌂</span>
+                Dashboard
+
+            </button>
+
+
+            <button class="nav-item"
+                    data-page="tutor">
+
+                <span>✦</span>
+                AI Tutor
+
+            </button>
+
+
+            <button class="nav-item"
+                    data-page="quiz">
+
+                <span>✓</span>
+                Quiz
+
+            </button>
+
+
+            <button class="nav-item"
+                    data-page="topics">
+
+                <span>▦</span>
+                Topics
+
+            </button>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="ai-status">
+
+                <span class="status-dot"></span>
+
+                <div>
+
+                    <strong>Local AI</strong>
+
+                    <small id="modelStatus">
+                        Ollama • Llama 3.2
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================================================= -->
+    <!-- MAIN CONTENT -->
+    <!-- ================================================= -->
+
+    <main class="main-content">
+
+
+        <!-- ================================================= -->
+        <!-- DASHBOARD -->
+        <!-- ================================================= -->
+
+        <section id="dashboard"
+                 class="page active">
+
+            <div class="page-header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        DATA ANALYTICS LEARNING
+                    </p>
+
+                    <h2>
+                        Learn Data.<br>
+                        Build Insights.
+                    </h2>
+
+                    <p class="page-description">
+                        Learn analytics concepts, ask questions
+                        and test your knowledge with InsightForge AI.
+                    </p>
+
+                </div>
+
+
+                <button class="primary-button"
+                        onclick="showPage('tutor')">
+
+                    Start Learning
+                    <span>→</span>
+
+                </button>
+
+            </div>
+
+
+            <!-- STATS -->
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>Quizzes Taken</span>
+
+                        <strong id="quizTaken">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        %
+                    </div>
+
+                    <div>
+
+                        <span>Average Score</span>
+
+                        <strong id="averageScore">
+                            0%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon">
+                        ★
+                    </div>
+
+                    <div>
+
+                        <span>Best Score</span>
+
+                        <strong id="bestScore">
+                            0%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOPIC OF DAY -->
+
+            <div class="section-title-row">
+
+                <div>
+
+                    <p class="eyebrow">
+                        DAILY LEARNING
+                    </p>
+
+                    <h3>
+                        Topic of the Day
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <div id="topicOfDay"
+                 class="topic-feature">
+
+                Loading...
+
+            </div>
+
+
+            <!-- POPULAR TOPICS -->
+
+            <div class="section-title-row">
+
+                <div>
+
+                    <p class="eyebrow">
+                        EXPLORE
+                    </p>
+
+                    <h3>
+                        Popular Topics
+                    </h3>
+
+                </div>
+
+                <button class="text-button"
+                        onclick="showPage('topics')">
+
+                    View All →
+
+                </button>
+
+            </div>
+
+
+            <div id="dashboardTopics"
+                 class="topic-grid">
+
+            </div>
+
+
+            <!-- QUICK ACTIONS -->
+
+            <div class="quick-actions">
+
+                <button onclick="showPage('tutor')">
+
+                    <div class="quick-icon">
+                        ✦
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Ask AI Tutor
+                        </strong>
+
+                        <span>
+                            Get an explanation of any analytics concept
+                        </span>
+
+                    </div>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </button>
+
+
+                <button onclick="showPage('quiz')">
+
+                    <div class="quick-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Take a Quiz
+                        </strong>
+
+                        <span>
+                            Test your analytics knowledge
+                        </span>
+
+                    </div>
+
+                    <span class="arrow">
+                        →
+                    </span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- AI TUTOR -->
+        <!-- ================================================= -->
+
+        <section id="tutor"
+                 class="page">
+
+            <div class="page-title">
+
+                <p class="eyebrow">
+                    PERSONAL AI TUTOR
+                </p>
+
+                <h2>
+                    Ask InsightForge
+                </h2>
+
+                <p>
+                    Ask questions about SQL, Excel, Power BI,
+                    statistics, Python and data analytics.
+                </p>
+
+            </div>
+
+
+            <div class="tutor-layout">
+
+
+                <!-- CHAT -->
+
+                <div class="tutor-card">
+
+                    <div class="chat-header">
+
+                        <div class="chat-avatar">
+                            IF
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                InsightForge AI
+                            </strong>
+
+                            <span>
+                                Data Analytics Tutor
+                            </span>
+
+                        </div>
+
+                        <div class="online-label">
+                            ● Online
+                        </div>
+
+                    </div>
+
+
+                    <div id="chatBox"
+                         class="chat-box">
+
+                        <div class="chat-message ai-message">
+
+                            <div class="message-avatar">
+                                IF
+                            </div>
+
+                            <div class="message-content">
+
+                                <div class="message-name">
+                                    InsightForge AI
+                                </div>
+
+                                <div class="ai-text">
+
+                                    <h3>
+                                        Welcome to InsightForge AI
+                                    </h3>
+
+                                    <p>
+                                        I can help you learn
+                                        data analytics concepts.
+                                        Ask me anything about SQL,
+                                        Excel, Power BI, statistics,
+                                        Python or databases.
+                                    </p>
+
+                                    <div class="welcome-points">
+
+                                        <span>
+                                            SQL
+                                        </span>
+
+                                        <span>
+                                            Excel
+                                        </span>
+
+                                        <span>
+                                            Power BI
+                                        </span>
+
+                                        <span>
+                                            Statistics
+                                        </span>
+
+                                        <span>
+                                            Python
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SUGGESTIONS -->
+
+                    <div class="suggestions">
+
+                        <button onclick="useQuestion('Explain SQL JOINs with an example')">
+                            SQL JOINs
+                        </button>
+
+                        <button onclick="useQuestion('Explain Excel Pivot Tables')">
+                            Excel Pivot Tables
+                        </button>
+
+                        <button onclick="useQuestion('What is Power BI?')">
+                            Power BI
+                        </button>
+
+                        <button onclick="useQuestion('Explain standard deviation')">
+                            Statistics
+                        </button>
+
+                        <button onclick="useQuestion('Explain Pandas DataFrame')">
+                            Python
+                        </button>
+
+                    </div>
+
+
+                    <!-- RESPONSE CONTROLS -->
+
+                    <div class="response-controls">
+
+                        <span>
+                            Response length
+                        </span>
+
+                        <div class="length-buttons">
+
+                            <button data-limit="50">
+                                50
+                            </button>
+
+                            <button class="active"
+                                    data-limit="250">
+                                250
+                            </button>
+
+                            <button data-limit="500">
+                                500
+                            </button>
+
+                            <button data-limit="1000">
+                                1000
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- INPUT -->
+
+                    <div class="input-area">
+
+                        <button id="micButton"
+                                class="icon-button"
+                                title="Use microphone"
+                                onclick="startVoiceInput()">
+
+                            🎙
+
+                        </button>
+
+
+                        <textarea id="tutorInput"
+                                  rows="1"
+                                  placeholder="Ask a data analytics question..."></textarea>
+
+
+                        <button class="send-button"
+                                onclick="sendTutorMessage()">
+
+                            Send
+                            <span>→</span>
+
+                        </button>
+
+                    </div>
+
+
+                    <div id="voiceStatus"
+                         class="voice-status">
+
+                    </div>
+
+
+                    <div class="input-hint">
+
+                        Press Enter to send • Shift + Enter for a new line
+
+                    </div>
+
+                </div>
+
+
+                <!-- TUTOR INFORMATION -->
+
+                <aside class="tutor-sidebar">
+
+                    <div class="info-card">
+
+                        <div class="info-icon">
+                            ✦
+                        </div>
+
+                        <h3>
+                            AI-Powered Learning
+                        </h3>
+
+                        <p>
+                            InsightForge uses a local Llama 3.2
+                            model through Ollama to answer
+                            data analytics questions.
+                        </p>
+
+                    </div>
+
+
+                    <div class="info-card">
+
+                        <h3>
+                            Learning Areas
+                        </h3>
+
+                        <ul>
+
+                            <li>
+                                SQL & Databases
+                            </li>
+
+                            <li>
+                                Excel & Power Query
+                            </li>
+
+                            <li>
+                                Power BI & DAX
+                            </li>
+
+                            <li>
+                                Statistics
+                            </li>
+
+                            <li>
+                                Python & Pandas
+                            </li>
+
+                            <li>
+                                Data Visualization
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                </aside>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- QUIZ -->
+        <!-- ================================================= -->
+
+        <section id="quiz"
+                 class="page">
+
+            <div class="page-title">
+
+                <p class="eyebrow">
+                    KNOWLEDGE CHECK
+                </p>
+
+                <h2>
+                    Analytics Quiz
+                </h2>
+
+                <p>
+                    Select a field or use the default All Topics quiz.
+                </p>
+
+            </div>
+
+
+            <!-- QUIZ SETUP -->
+
+            <div id="quizSetup"
+                 class="quiz-setup">
+
+
+                <div class="quiz-selection-card">
+
+                    <div class="selection-icon">
+                        01
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Choose Quiz Field
+                        </h3>
+
+                        <p>
+                            Select a specific analytics field
+                            or keep All Topics for a mixed quiz.
+                        </p>
+
+                    </div>
+
+
+                    <select id="quizCategory">
+
+                        <option value="All Topics">
+                            All Topics
+                        </option>
+
+                        <option value="SQL">
+                            SQL
+                        </option>
+
+                        <option value="Database">
+                            Database
+                        </option>
+
+                        <option value="Excel">
+                            Excel
+                        </option>
+
+                        <option value="Power BI">
+                            Power BI
+                        </option>
+
+                        <option value="Statistics">
+                            Statistics
+                        </option>
+
+                        <option value="Python">
+                            Python
+                        </option>
+
+                        <option value="Data Engineering">
+                            Data Engineering
+                        </option>
+
+                        <option value="Data Visualization">
+                            Data Visualization
+                        </option>
+
+                        <option value="Data Preparation">
+                            Data Preparation
+                        </option>
+
+                        <option value="Business Analytics">
+                            Business Analytics
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="quiz-selection-card">
+
+                    <div class="selection-icon">
+                        02
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Choose Number of Questions
+                        </h3>
+
+                        <p>
+                            Select how many questions you want.
+                        </p>
+
+                    </div>
+
+
+                    <div class="quiz-size-buttons">
+
+                        <button data-size="5">
+                            5 Questions
+                        </button>
+
+                        <button class="active"
+                                data-size="10">
+                            10 Questions
+                        </button>
+
+                        <button data-size="15">
+                            15 Questions
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <button class="start-quiz-button"
+                        onclick="startQuiz()">
+
+                    Start Quiz
+                    <span>→</span>
+
+                </button>
+
+            </div>
+
+
+            <!-- QUIZ QUESTIONS -->
+
+            <div id="quizContainer"
+                 class="quiz-container hidden">
+
+                <div class="quiz-topbar">
+
+                    <button class="back-button"
+                            onclick="resetQuiz()">
+
+                        ← Exit Quiz
+
+                    </button>
+
+
+                    <div class="quiz-meta">
+
+                        <span id="quizCategoryLabel">
+                            All Topics
+                        </span>
+
+                        <span id="quizProgress">
+                            Question 1 of 10
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="quiz-progress-bar">
+
+                    <div id="quizProgressFill"></div>
+
+                </div>
+
+
+                <div class="quiz-card">
+
+                    <div class="question-number"
+                         id="questionNumber">
+
+                        Question 1
+
+                    </div>
+
+
+                    <h3 id="questionText">
+
+                    </h3>
+
+
+                    <div id="answerOptions"
+                         class="answer-options">
+
+                    </div>
+
+
+                    <button id="nextQuestionButton"
+                            class="primary-button next-button"
+                            onclick="nextQuestion()">
+
+                        Next Question
+                        <span>→</span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- QUIZ RESULT -->
+
+            <div id="quizResult"
+                 class="quiz-result hidden">
+
+                <div class="result-icon">
+                    ✓
+                </div>
+
+                <p class="eyebrow">
+                    QUIZ COMPLETE
+                </p>
+
+                <h2>
+                    Your Results
+                </h2>
+
+
+                <div class="result-score">
+
+                    <strong id="resultScore">
+                        0/10
+                    </strong>
+
+                    <span id="resultPercentage">
+                        0%
+                    </span>
+
+                </div>
+
+
+                <p id="resultFeedback">
+                </p>
+
+
+                <div id="quizReview"
+                     class="quiz-review">
+
+                </div>
+
+
+                <button class="primary-button"
+                        onclick="resetQuiz()">
+
+                    Take Another Quiz
+                    <span>↻</span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- TOPICS -->
+        <!-- ================================================= -->
+
+        <section id="topics"
+                 class="page">
+
+            <div class="page-title">
+
+                <p class="eyebrow">
+                    LEARNING LIBRARY
+                </p>
+
+                <h2>
+                    Data Analytics Topics
+                </h2>
+
+                <p>
+                    Explore analytics concepts and learn
+                    each topic with InsightForge AI.
+                </p>
+
+            </div>
+
+
+            <div class="topic-search">
+
+                <input id="topicSearch"
+                       type="text"
+                       placeholder="Search topics...">
+
+                <span>
+                    ⌕
+                </span>
+
+            </div>
+
+
+            <div id="topicsLibrary"
+                 class="topic-grid">
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- TOPIC MODAL -->
+<!-- ===================================================== -->
+
+<div id="topicModal"
+     class="modal hidden">
+
+    <div class="modal-overlay"
+         onclick="closeTopicModal()"></div>
+
+
+    <div class="modal-content">
+
+        <button class="modal-close"
+                onclick="closeTopicModal()">
+
+            ×
+
+        </button>
+
+
+        <div id="modalCategory"
+             class="topic-category">
+
+        </div>
+
+
+        <h2 id="modalTitle">
+
+        </h2>
+
+
+        <div class="modal-meta">
+
+            <span id="modalLevel">
+
+            </span>
+
+        </div>
+
+
+        <p id="modalDescription"
+           class="modal-description">
+
+        </p>
+
+
+        <div class="modal-section">
+
+            <h3>
+                Concept
+            </h3>
+
+            <p id="modalDetails">
+
+            </p>
+
+        </div>
+
+
+        <div class="modal-section example-box">
+
+            <h3>
+                Practical Example
+            </h3>
+
+            <pre id="modalExample"></pre>
+
+        </div>
+
+
+        <button class="primary-button"
+                onclick="learnTopicWithAI()">
+
+            Ask AI Tutor About This
+            <span>→</span>
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- EMPTY MESSAGE POPUP -->
+<!-- ===================================================== -->
+
+<div id="messagePopup"
+     class="popup hidden">
+
+    <div class="popup-card">
+
+        <div class="popup-icon">
+            !
+        </div>
+
+        <div>
+
+            <h3>
+                Message Required
+            </h3>
+
+            <p>
+                Please enter a message or question.
+            </p>
+
+        </div>
+
+
+        <button onclick="closePopup()">
+            OK
+        </button>
+
+    </div>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+
+</html>
