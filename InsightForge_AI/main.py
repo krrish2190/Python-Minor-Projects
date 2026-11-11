@@ -58,10 +58,10 @@ LOGIN_ATTEMPTS = {}
 DB_PATH = Path(os.environ.get("INSIGHTFORGE_DB_PATH", str(BASE_DIR / "insightforge.db")))
 ADMIN_EMAIL = os.environ.get("INSIGHTFORGE_ADMIN_EMAIL", "").strip().lower()
 
-GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "openai/gpt-oss-20b"
-GROQ_TIMEOUT = 300
-
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
+OLLAMA_TAGS_URL = os.environ.get("OLLAMA_TAGS_URL", "http://localhost:11434/api/tags")
+MODEL = "qwen3:8b"
+OLLAMA_TIMEOUT = 300
 INTERVIEW_QUESTION_TIMEOUT = 15
 INTERVIEW_EVALUATION_TIMEOUT = 60
 WORD_LIMITS = [50, 100, 250, 500, 1000]
@@ -557,44 +557,23 @@ Completeness rules:
 User question: {message}{follow}"""
 
 
-
 def ollama_available():
-    return bool(os.environ.get("GROQ_API_KEY", "").strip())
+    try:
+        response = requests.get(OLLAMA_TAGS_URL, timeout=5)
+        response.raise_for_status()
+        return any(m.get("name", "") == MODEL for m in response.json().get("models", []))
+    except Exception:
+        return False
 
 
-def ask_ollama(prompt, timeout=GROQ_TIMEOUT, **options):
-    api_key = os.environ.get("GROQ_API_KEY", "").strip()
-
-    if not api_key:
-        raise RuntimeError("GROQ_API_KEY is not configured.")
-
-    payload = {
-        "model": GROQ_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "max_completion_tokens": options.pop("num_predict", 1000),
-    }
-
-    temperature = options.pop("temperature", None)
-    if temperature is not None:
-        payload["temperature"] = temperature
-
-    options.pop("think", None)
-
+def ask_ollama(promt, timeout=OLLAMA_TIMEOUT, **options):
     response = requests.post(
-        GROQ_URL,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        json=payload,
+        OLLAMA_URL,
+        json={"model": MODEL, "promt": promt, "stream": False, **options},
         timeout=timeout,
     )
-
     response.raise_for_status()
-    data = response.json()
-
-    return data["choices"][0]["message"]["content"].strip()
-
+    return response.json().get("response", "").strip()
 
 
 FALLBACK_TUTOR_ANSWERS = {
@@ -745,7 +724,7 @@ def index():
 @app.route("/api/health")
 def health():
     available = ollama_available()
-    return jsonify({"ollama": available, "model": GROQ_MODEL, "status": "ready" if available else "offline"})
+    return jsonify({"ollama": available, "model": MODEL, "status": "ready" if available else "offline"})
 
 
 @app.route("/api/topics")
