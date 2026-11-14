@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, render_template, request, jsonify, Response, stream_with_context, session
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
@@ -58,10 +60,11 @@ LOGIN_ATTEMPTS = {}
 DB_PATH = Path(os.environ.get("INSIGHTFORGE_DB_PATH", str(BASE_DIR / "insightforge.db")))
 ADMIN_EMAIL = os.environ.get("INSIGHTFORGE_ADMIN_EMAIL", "").strip().lower()
 
-OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
-OLLAMA_TAGS_URL = os.environ.get("OLLAMA_TAGS_URL", "http://localhost:11434/api/tags")
-MODEL = "qwen3:8b"
-OLLAMA_TIMEOUT = 300
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODELS_URL = "https://api.groq.com/openai/v1/models"
+GROQ_MODEL = "openai/gpt-oss-20b"
+GROQ_TIMEOUT = 300
+
 INTERVIEW_QUESTION_TIMEOUT = 15
 INTERVIEW_EVALUATION_TIMEOUT = 60
 WORD_LIMITS = [50, 100, 250, 500, 1000]
@@ -557,23 +560,70 @@ Completeness rules:
 User question: {message}{follow}"""
 
 
+
 def ollama_available():
+    """Check whether the configured Groq model is accessible."""
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
+
+    if not api_key:
+        return False
+
     try:
-        response = requests.get(OLLAMA_TAGS_URL, timeout=5)
+        response = requests.get(
+            GROQ_MODELS_URL,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            timeout=8,
+        )
         response.raise_for_status()
-        return any(m.get("name", "") == MODEL for m in response.json().get("models", []))
+
+        models = response.json().get("data", [])
+        available_models = {
+            item.get("id") for item in models
+        }
+
+        return GROQ_MODEL in available_models
+
     except Exception:
+        app.logger.exception("Groq availability check failed")
         return False
 
 
-def ask_ollama(promt, timeout=OLLAMA_TIMEOUT, **options):
+def ask_ollama(prompt, timeout=GROQ_TIMEOUT, **options):
+    api_key = os.environ.get("GROQ_API_KEY", "").strip()
+
+    if not api_key:
+        raise RuntimeError("GROQ_API_KEY is not configured.")
+
+    payload = {
+        "model": GROQ_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_completion_tokens": options.pop("num_predict", 1000),
+    }
+
+    temperature = options.pop("temperature", None)
+    if temperature is not None:
+        payload["temperature"] = temperature
+
+    options.pop("think", None)
+
     response = requests.post(
-        OLLAMA_URL,
-        json={"model": MODEL, "promt": promt, "stream": False, **options},
+        GROQ_URL,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
         timeout=timeout,
     )
+
     response.raise_for_status()
-    return response.json().get("response", "").strip()
+    data = response.json()
+
+    return data["choices"][0]["message"]["content"].strip()
+
 
 
 FALLBACK_TUTOR_ANSWERS = {
@@ -724,7 +774,13 @@ def index():
 @app.route("/api/health")
 def health():
     available = ollama_available()
-    return jsonify({"ollama": available, "model": MODEL, "status": "ready" if available else "offline"})
+
+    return jsonify({
+        "groq": available,
+        "ollama": available,
+        "model": GROQ_MODEL,
+        "status": "ready" if available else "offline"
+    })
 
 
 @app.route("/api/topics")
@@ -1330,7 +1386,10 @@ Use four distinct plausible options. The answer must exactly match one option. K
             return jsonify({"question":question,"options":options,"answer":answer,"explanation":str(generated.get("explanation") or f"{answer} is correct for this {topic} question."),"topic":topic,"difficulty":difficulty})
         raise ValueError("No unique question was returned")
     except Exception as exc:
-        return jsonify({"error":"No new question is available for this topic and difficulty right now. Please try again."}),503
+        app.logger.exception("Practice question generation failed: %s", exc)
+    return jsonify({
+        "error": "No new question is available for this topic and difficulty right now. Please try again."
+        }), 503
 
 
 @app.route("/api/projects")
@@ -1683,7 +1742,7 @@ is_relevant must be a JSON boolean. All scores must be numbers from 0 to 10. If 
 
     ai_evaluation_received = False
     try:
-        raw = ask_ollama(prompt, timeout=INTERVIEW_EVALUATION_TIMEOUT, num_predict=480, temperature=0.2, think=False)
+        raw = ask_ollama(prompt, timeout=INTERVIEW_EVALUATION_TIMEOUT, num_predict=1600, temperature=0.2, think=False)
         raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip(), flags=re.I)
         object_start = raw.find("{")
         if object_start >= 0:
@@ -1697,7 +1756,7 @@ is_relevant must be a JSON boolean. All scores must be numbers from 0 to 10. If 
                 and all(key in obj for key in ("correctness", "technical_understanding", "completeness", "communication", "confidence", "feedback", "ideal_answer"))
             )
     except Exception:
-        pass
+        app.logger.exception("Interview answer evaluation failed")
 
     if not ai_evaluation_received:
         return jsonify({"error": "The interview evaluator could not determine answer relevance. Please try submitting the answer again."}), 503
